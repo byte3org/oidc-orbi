@@ -58,7 +58,7 @@ func SetupServer(issuer string, storage Storage, extraOptions ...op.Option) *mux
 	// for the simplicity of the example this means a simple page with username and password field
 	l := NewAuthRouter(storage, op.AuthCallbackURL(provider))
 
-	router.PathPrefix("/auth/").Handler(http.StripPrefix("/auth", l.router))
+	router.PathPrefix("/api/").Handler(http.StripPrefix("/api", l.router))
 
 	router.PathPrefix("/device").Subrouter()
 	registerDeviceAuth(storage, router.PathPrefix("/device").Subrouter())
