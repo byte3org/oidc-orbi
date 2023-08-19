@@ -2,7 +2,10 @@ package infrastructure
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/byte3org/oidc-orbi/internal/lib"
+	"github.com/byte3org/oidc-orbi/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -13,7 +16,7 @@ type Database struct {
 }
 
 // NewDatabase creates a new database instance
-func NewDatabase(logger lib.Logger, env *lib.Env) Database {
+func NewDatabase(env *lib.Env) Database {
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s  sslmode=%s TimeZone=UTC",
 		env.DBHost, env.DBUsername, env.DBPassword, env.DBName, "disable")
@@ -23,21 +26,14 @@ func NewDatabase(logger lib.Logger, env *lib.Env) Database {
 	}), &gorm.Config{})
 
 	if err != nil {
-		logger.Panic(err)
+		log.Panic(err)
 	}
 
-	/*
-		err = db.AutoMigrate(&models.Blog{},
-			&models.Answer{}, &models.Forum{},
-			&models.User{}, &models.Answer{},
-			&models.Like{},
-			&models.Event{}, &models.Speaker{},
-		)
+	err = db.AutoMigrate(&models.User{})
 
-		if err != nil {
-			logger.Panic(err)
-		}
-	*/
+	if err != nil {
+		log.Panic(err)
+	}
 
 	return Database{DB: db}
 }

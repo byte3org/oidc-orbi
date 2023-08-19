@@ -5,14 +5,22 @@
 *.so
 *.dylib
 
-# Test binary, build with `go test -c`
+# Test binary, built with `go test -c`
 *.test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-**/__debug_bin
-.vscode
-.DS_Store
-.idea
-vendor
+.env
+# Dependency directories (remove the comment below to include it)
+vendor/
+
+tmp/
+
+.config.yml
+
+go.sum
+.env*
+.flaskenv*
+!.env.project
+!.env.vault

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/text/language"
 	"gopkg.in/square/go-jose.v2"
 
 	"github.com/zitadel/oidc/v2/pkg/oidc"
@@ -134,14 +135,10 @@ func (s *Storage) CheckUsernamePassword(username, password, id string) error {
 		return fmt.Errorf("request not found")
 	}
 
-	// for demonstration purposes we'll check we'll have a simple user store and
-	// a plain text password.  For real world scenarios, be sure to have the password
-	// hashed and salted (e.g. using bcrypt)
 	user := s.userStore.GetUserByUsername(username)
-	if user != nil && user.Password == password {
-		// be sure to set user id into the auth request after the user was checked,
-		// so that you'll be able to get more information about the user after the login
-		request.UserID = user.ID
+
+	if user.ValidatePassword(password) {
+		request.UserID = user.ID.String()
 
 		// you will have to change some state on the request to guide the user through possible multiple steps of the login process
 		// in this example we'll simply check the username / password and set a boolean to true
@@ -647,7 +644,7 @@ func (s *Storage) setUserinfo(ctx context.Context, userInfo *oidc.UserInfo, user
 	for _, scope := range scopes {
 		switch scope {
 		case oidc.ScopeOpenID:
-			userInfo.Subject = user.ID
+			userInfo.Subject = user.ID.String()
 		case oidc.ScopeEmail:
 			userInfo.Email = user.Email
 			userInfo.EmailVerified = oidc.Bool(user.EmailVerified)
@@ -656,7 +653,7 @@ func (s *Storage) setUserinfo(ctx context.Context, userInfo *oidc.UserInfo, user
 			userInfo.Name = user.FirstName + " " + user.LastName
 			userInfo.FamilyName = user.LastName
 			userInfo.GivenName = user.FirstName
-			userInfo.Locale = oidc.NewLocale(user.PreferredLanguage)
+			userInfo.Locale = oidc.NewLocale(language.English)
 		case oidc.ScopePhone:
 			userInfo.PhoneNumber = user.Phone
 			userInfo.PhoneNumberVerified = user.PhoneVerified

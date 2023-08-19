@@ -68,6 +68,7 @@ func (l *login) checkLoginHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 	id := r.FormValue("id")
 	err = l.authenticate.CheckUsernamePassword(username, password, id)
+
 	if err != nil {
 		renderLogin(w, id, err)
 		return

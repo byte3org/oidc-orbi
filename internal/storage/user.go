@@ -2,7 +2,10 @@ package storage
 
 import (
 	"crypto/rsa"
-	"golang.org/x/text/language"
+	"log"
+
+	"github.com/byte3org/oidc-orbi/internal/models"
+	"github.com/byte3org/oidc-orbi/internal/repository"
 )
 
 type Service struct {
@@ -10,8 +13,8 @@ type Service struct {
 }
 
 type UserStore interface {
-	GetUserByID(string) *User
-	GetUserByUsername(string) *User
+	GetUserByID(string) *models.User
+	GetUserByUsername(string) *models.User
 	ExampleClientID() string
 }
 
@@ -19,36 +22,9 @@ type userStore struct {
 	repository repository.UsersRepository
 }
 
-func NewUserStore(issuer string) UserStore {
+func NewUserStore(issuer string, userRepository repository.UsersRepository) UserStore {
 	return userStore{
-		users: map[string]*User{
-			"id1": {
-				ID:                "id1",
-				Username:          "test",
-				Password:          "verysecure",
-				FirstName:         "Test",
-				LastName:          "User",
-				Email:             "test-user@zitadel.ch",
-				EmailVerified:     true,
-				Phone:             "",
-				PhoneVerified:     false,
-				PreferredLanguage: language.German,
-				IsAdmin:           true,
-			},
-			"id2": {
-				ID:                "id2",
-				Username:          "test-user2",
-				Password:          "verysecure",
-				FirstName:         "Test",
-				LastName:          "User2",
-				Email:             "test-user2@zitadel.ch",
-				EmailVerified:     true,
-				Phone:             "",
-				PhoneVerified:     false,
-				PreferredLanguage: language.German,
-				IsAdmin:           false,
-			},
-		},
+		repository: userRepository,
 	}
 }
 
@@ -57,15 +33,22 @@ func (u userStore) ExampleClientID() string {
 	return "service"
 }
 
-func (u userStore) GetUserByID(id string) *User {
-	return u.users[id]
+func (u userStore) GetUserByID(id string) *models.User {
+	result, err := u.repository.FindOneById(id)
+
+	if err != nil {
+		log.Print(err)
+	}
+
+	return result
 }
 
-func (u userStore) GetUserByUsername(username string) *User {
-	for _, user := range u.users {
-		if user.Username == username {
-			return user
-		}
+func (u userStore) GetUserByUsername(username string) *models.User {
+	result, err := u.repository.FindOneByUserName(username)
+
+	if err != nil {
+		log.Print(err)
 	}
-	return nil
+
+	return result
 }
