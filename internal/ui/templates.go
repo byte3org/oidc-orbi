@@ -12,7 +12,7 @@ var (
 )
 
 const (
-	queryAuthRequestID = "authRequestID"
+	queryAuthRequestID = "auth_request_id"
 )
 
 func errMsg(err error) string {

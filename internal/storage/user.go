@@ -16,6 +16,7 @@ type UserStore interface {
 	GetUserByID(string) *models.User
 	GetUserByUsername(string) *models.User
 	ExampleClientID() string
+	Create(user models.User) (*models.User, error)
 }
 
 type userStore struct {
@@ -51,4 +52,14 @@ func (u userStore) GetUserByUsername(username string) *models.User {
 	}
 
 	return result
+}
+
+func (u userStore) Create(user models.User) (*models.User, error) {
+	err := u.repository.Create(&user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, err
 }

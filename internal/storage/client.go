@@ -10,7 +10,7 @@ import (
 var (
 	// we use the default login UI and pass the (auth request) id
 	defaultLoginURL = func(id string) string {
-		return "/login/username?authRequestID=" + id
+		return "/auth/sign-in?auth_request_id=" + id
 	}
 
 	// clients to be used by the storage interface

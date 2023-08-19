@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/byte3org/oidc-orbi/internal/infrastructure"
 	"github.com/byte3org/oidc-orbi/internal/models"
+	"github.com/byte3org/oidc-orbi/internal/utils"
 )
 
 type UsersRepository struct {
@@ -18,6 +19,16 @@ func (s UsersRepository) Save(user *models.User) error {
 }
 
 func (s UsersRepository) Create(user *models.User) error {
+
+	if user.Password != "" {
+		hash, err := utils.MakePassword(user.Password)
+		if err != nil {
+			return err
+		}
+
+		user.Password = hash
+	}
+
 	return s.DB.Create(&user).Error
 }
 

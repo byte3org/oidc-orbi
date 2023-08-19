@@ -1,9 +1,9 @@
-{{ define "login" -}}
+{{ define "sign-up" -}}
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Login</title>
+    <title>Sign Up</title>
   </head>
 
   <body
@@ -16,7 +16,7 @@
   >
     <form
       method="POST"
-      action="/auth/sign-in"
+      action="/auth/sign-up"
       style="height: 200px; width: 200px"
     >
       <input type="hidden" name="id" value="{{.ID}}" />
@@ -31,9 +31,29 @@
         <input id="password" name="password" style="width: 100%" />
       </div>
 
+      <div>
+        <label for="firstName">First Name:</label>
+        <input id="firstName" name="firstName" style="width: 100%" />
+      </div>
+
+      <div>
+        <label for="lastName">Last Name:</label>
+        <input id="lastName" name="lastName" style="width: 100%" />
+      </div>
+
+      <div>
+        <label for="email">Email:</label>
+        <input id="email" name="email" style="width: 100%" />
+      </div>
+
+      <div>
+        <label for="phone">Phone:</label>
+        <input id="phone" name="phone" style="width: 100%" />
+      </div>
+
       <p style="color: red; min-height: 1rem">{{.Error}}</p>
 
-      <button type="submit">Login</button>
+      <button type="submit">Sign Up</button>
     </form>
   </body>
 </html>

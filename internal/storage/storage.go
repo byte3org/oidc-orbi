@@ -6,11 +6,13 @@ import (
 	"crypto/rsa"
 	"errors"
 	"fmt"
+	"log"
 	"math/big"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/byte3org/oidc-orbi/internal/models"
 	"github.com/google/uuid"
 	"golang.org/x/text/language"
 	"gopkg.in/square/go-jose.v2"
@@ -126,12 +128,18 @@ func NewStorage(userStore UserStore) *Storage {
 	}
 }
 
+func (s *Storage) CreateUser(user models.User) (*models.User, error) {
+	return s.userStore.Create(user)
+}
+
 // CheckUsernamePassword implements the `authenticate` interface of the login
 func (s *Storage) CheckUsernamePassword(username, password, id string) error {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	request, ok := s.authRequests[id]
+
 	if !ok {
+		log.Print(ok)
 		return fmt.Errorf("request not found")
 	}
 
@@ -217,7 +225,7 @@ func (s *Storage) AuthRequestByCode(ctx context.Context, code string) (op.AuthRe
 // it will be called after the authentication has been successful and before redirecting the user agent to the redirect_uri
 // (in an authorization code flow)
 func (s *Storage) SaveAuthCode(ctx context.Context, id string, code string) error {
-	// for this example we'll just save the authRequestID to the code
+	// for this example we'll just save the auth_request_id to the code
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	s.codes[code] = id

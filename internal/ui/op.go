@@ -56,11 +56,9 @@ func SetupServer(issuer string, storage Storage, extraOptions ...op.Option) *mux
 
 	// the provider will only take care of the OpenID Protocol, so there must be some sort of UI for the login process
 	// for the simplicity of the example this means a simple page with username and password field
-	l := NewLogin(storage, op.AuthCallbackURL(provider))
+	l := NewAuthRouter(storage, op.AuthCallbackURL(provider))
 
-	// regardless of how many pages / steps there are in the process, the UI must be registered in the router,
-	// so we will direct all calls to /login to the login UI
-	router.PathPrefix("/login/").Handler(http.StripPrefix("/login", l.router))
+	router.PathPrefix("/auth/").Handler(http.StripPrefix("/auth", l.router))
 
 	router.PathPrefix("/device").Subrouter()
 	registerDeviceAuth(storage, router.PathPrefix("/device").Subrouter())
