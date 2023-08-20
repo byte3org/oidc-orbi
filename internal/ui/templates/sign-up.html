@@ -4,6 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Sign Up</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
   </head>
 
   <body
@@ -43,7 +44,7 @@
 
       <div>
         <label for="email">Email:</label>
-        <input id="email" name="email" style="width: 100%" />
+        <input id="email" name="email" id="email" style="width: 100%" />
       </div>
 
       <div>
@@ -54,7 +55,97 @@
       <p style="color: red; min-height: 1rem">{{.Error}}</p>
 
       <button type="submit">Sign Up</button>
+      <button onclick="event.preventDefault()" id="web_auth_register">
+        WebAuthn Register
+      </button>
     </form>
   </body>
+
+  <script>
+    function bufferDecode(value) {
+      return Uint8Array.from(atob(value), (c) => c.charCodeAt(0));
+    }
+
+    function bufferEncode(value) {
+      return btoa(String.fromCharCode.apply(null, new Uint8Array(value)))
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=/g, "");
+    }
+
+    document
+      .getElementById("web_auth_register")
+      .addEventListener("click", function (event) {
+        event.preventDefault();
+        username = $("#email").val();
+        if (username === "") {
+          alert("Please enter a username");
+          return;
+        }
+
+        $.post(
+          "/api/webauthn/sign-up",
+          "username=" + username,
+          function (data) {
+            return data;
+          }
+        )
+          .then((credentialCreationOptions) => {
+            credentialCreationOptions.publicKey.challenge = bufferDecode(
+              credentialCreationOptions.publicKey.challenge
+            );
+            credentialCreationOptions.publicKey.user.id = bufferDecode(
+              credentialCreationOptions.publicKey.user.id
+            );
+            if (credentialCreationOptions.publicKey.excludeCredentials) {
+              for (
+                var i = 0;
+                i <
+                credentialCreationOptions.publicKey.excludeCredentials.length;
+                i++
+              ) {
+                credentialCreationOptions.publicKey.excludeCredentials[i].id =
+                  bufferDecode(
+                    credentialCreationOptions.publicKey.excludeCredentials[i].id
+                  );
+              }
+            }
+
+            return navigator.credentials.create({
+              publicKey: credentialCreationOptions.publicKey,
+            });
+          })
+          .then((credential) => {
+            console.log(credential);
+            let attestationObject = credential.response.attestationObject;
+            let clientDataJSON = credential.response.clientDataJSON;
+            let rawId = credential.rawId;
+
+            $.ajax({
+              type: "POST",
+              url: "/api/webauthn/sign-up/complete",
+              dataType: "json",
+              data: JSON.stringify({
+                id: credential.id,
+                rawId: bufferEncode(rawId),
+                type: credential.type,
+                response: {
+                  attestationObject: bufferEncode(attestationObject),
+                  clientDataJSON: bufferEncode(clientDataJSON),
+                },
+              }),
+              contentType: "application/json; charset=utf-8",
+              dataType: "json",
+            });
+          })
+          .then((success) => {
+            alert("successfully registered " + username + "!");
+            return;
+          })
+          .catch((error) => {
+            alert("failed to register " + username);
+          });
+      });
+  </script>
 </html>
 ` {{- end }}

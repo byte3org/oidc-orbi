@@ -168,6 +168,16 @@ func (s *Storage) CheckUsernamePasswordSimple(username, password string) error {
 	return fmt.Errorf("username or password wrong")
 }
 
+func (s *Storage) FindUserByUserName(username string) (*models.User, error) {
+	user := s.userStore.GetUserByUsername(username)
+
+	if user != nil {
+		return user, nil
+	}
+
+	return nil, fmt.Errorf("user not found")
+}
+
 // CreateAuthRequest implements the op.Storage interface
 // it will be called after parsing and validation of the authentication request
 func (s *Storage) CreateAuthRequest(ctx context.Context, authReq *oidc.AuthRequest, userID string) (op.AuthRequest, error) {

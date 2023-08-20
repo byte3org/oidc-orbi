@@ -59,7 +59,6 @@ func SetupServer(issuer string, storage Storage, extraOptions ...op.Option) *mux
 	l := NewAuthRouter(storage, op.AuthCallbackURL(provider))
 
 	router.PathPrefix("/api/").Handler(http.StripPrefix("/api", l.router))
-
 	router.PathPrefix("/device").Subrouter()
 	registerDeviceAuth(storage, router.PathPrefix("/device").Subrouter())
 
